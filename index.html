@@ -1,0 +1,124 @@
+<html>
+  <head>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.5.22/dist/vue.js"></script>
+        <script src="https://unpkg.com/axios@0.18.0/dist/axios.js"></script>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css?family=Poppins:400,500,700" rel="stylesheet" />
+    <link href="css/main.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="app">
+      <div class="s013">
+        <form>
+          <fieldset>
+            <legend>MUZIK BRAIN</legend>
+            <p class="font-italic text-center">Moteur de recherche par Artistes, Albums ou Singles</p>
+            <h6></h6>
+          </fieldset>
+          <div class="inner-form">
+            <div class="left">
+              <div class="input-wrap first">
+                <div class="input-field first">
+                  <label>Recherche: {{ selection }}</label>
+                  <input type="text" placeholder=" " v-model="input" />
+                </div>
+              </div>
+              <div class="input-wrap second">
+                <div class="input-field second">
+                  <label>Type</label>
+                  <div class="input-select">
+                    <select data-trigger="" name="choices-single-defaul" v-model="selection">
+                      <option placeholder="" value="Artiste">Artiste</option>
+                      <option value="Album" >Album</option>
+                      <option value="Single">Single</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button class="btn-search" type="button" v-on:click="search" >RECHERCHER</button>
+          </div>
+        </form>
+      </div>
+      <!-- Debut des cards-->
+      <div class="container">
+        <div class="row">
+          <!-- colonne des Artistes-->
+          <div v-if="artistesData" class="col">
+            <div class="card-header">
+              Artistes
+            </div>
+            <div v-for="artiste in artistesData.data.artists" class="card">
+              <div  class="card-body">
+                <h5 class="card-title">{{artiste.name}}<i v-if="artiste.type"> ({{artiste.type}})</i></h5>
+                <p class="card-text" v-if="artiste.disambiguation">is/are {{artiste.disambiguation}}</p>
+                <p class="card-text" v-if="artiste['life-span'].begin">born: {{artiste['life-span'].begin}}</p>
+                <p class="card-text" v-if="artiste.area">Pays: {{artiste.area.name}}</p>
+                <artiste v-bind:data="artiste" v-on:new-album="changeDataAlbum" v-on:set-artist="setNewArtiste" v-on:reset-col-singles="resetSingleColonne"></artiste>
+              </div>
+            </div>
+          </div>
+
+          <!-- colonne des Albums-->
+          <div v-if="albumData" class="col">
+            <div class="card-header">
+              Albums
+            </div>
+            <div v-for="album in albumData.data['release-groups']" class="card">
+              <div  class="card-body">
+                <album v-bind:data="album" v-on:set-album="setNewAlbum" v-on:new-singles="changeDataSingles" v-on:cover="getCover" v-on:load="loading = true" v-on:no-load="loading = false"></album>
+              </div>
+            </div>
+          </div>
+
+          <!-- colonne des Singles -->
+          <div v-if="albumSingle && albumSingle.data && albumSingle.data.media && albumSingle.data.media[0].tracks" class="col">
+            <div class="card-header">
+              Singles de l'album: {{albumSingle.data.media && albumSingle.data.title}}
+            </div>
+            <div class="card">
+              
+              <div  class="card-body">
+                <spinner v-if="loading"></spinner>
+                <img v-bind:src="image" id="cover"><br>
+                  <p class="card-text">Tracklist</p>
+                <div v-for="single in albumSingle.data.media[0].tracks">
+                  <p class="card-subtitle mb-2 text-muted" >{{single.position}} - {{single.title}}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- colonne des Singles- par recherche -->
+          <div v-if="albumSingle && albumSingle.data.recordings" class="col">
+            <div class="card-header">
+              Singles
+            </div>
+            <div v-for="single in albumSingle.data.recordings" class="card">
+              <img v-bind:src="image">
+              <div  class="card-body">
+                <h5 class="card-title" >{{single.title}}</h5>
+                <p class="card-subtitle mb-2 text-muted">De {{single['artist-credit'][0].name}}</p>
+              </div>
+            </div>
+          </div>
+
+
+
+
+        </div>
+
+      </div>
+    </div>
+  </body>
+</html>
+
+        <script type="text/javascript" src="vue.js"></script>
+        <script type="text/javascript" src="artiste.js"></script>
+        <script type="text/javascript" src="album.js"></script>
+        <script type="text/javascript" src="spinner.js"></script>
+
